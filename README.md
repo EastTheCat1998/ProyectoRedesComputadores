@@ -5,6 +5,8 @@ Código e instrucciones del proyecto
  Descripción
 Este proyecto analiza el tráfico de una red LAN a partir de archivos de captura (`.pcap`), detectando posibles congestiones y retransmisiones de paquetes. Utiliza `pyshark` para procesar los datos y `matplotlib` para la visualización gráfica.
 
+Se puede correr el archivo run.sh que está en el repositorio o seguir las instrucciones a continuación. 
+
  Requisitos del Sistema
 - Sistema Operativo:* WSL (Ubuntu)  
 - Python 3.8 o superior 

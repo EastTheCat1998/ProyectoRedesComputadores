@@ -1,0 +1,53 @@
+import pyshark
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def main():
+    # Cargar la captura de paquetes desde 'capture.pcap'
+    cap = pyshark.FileCapture('capture.pcap', custom_parameters=['-s', '0'])
+    data = []
+    
+    for packet in cap:
+        try:
+            timestamp = float(packet.sniff_timestamp)
+            src = packet.ip.src
+            dst = packet.ip.dst
+            length = int(packet.length)
+            is_retrans = 0
+            # Detectar retransmisiones en la capa TCP
+            if hasattr(packet, 'tcp') and ('analysis_retransmission' in packet.tcp.field_names):
+                is_retrans = 1
+            data.append({
+                'time': timestamp,
+                'src': src,
+                'dst': dst,
+                'size': length,
+                'retransmission': is_retrans
+            })
+        except AttributeError:
+            continue
+
+    # Convertir la lista de datos en un DataFrame
+    df = pd.DataFrame(data)
+    print("Columnas del DataFrame:", df.columns.tolist())
+    print("Primeras filas del DataFrame:")
+    print(df.head(10))
+    
+    # Guardar los datos en un archivo CSV
+    df.to_csv('trafico.csv', index=False)
+    
+    # Graficar el número de paquetes por segundo
+    df['time_bin'] = df['time'].astype(int)
+    paquetes_por_segundo = df.groupby('time_bin').size()
+    
+    plt.figure(figsize=(10,6))
+    plt.plot(paquetes_por_segundo.index, paquetes_por_segundo.values, marker='o', label='Paquetes/s')
+    plt.xlabel('Tiempo (s)')
+    plt.ylabel('Número de paquetes')
+    plt.title('Número de Paquetes por Segundo')
+    plt.legend()
+    plt.savefig("grafico_paquetes.png")
+    plt.show()
+
+if __name__ == '__main__':
+    main()
